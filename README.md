@@ -108,12 +108,17 @@ continuous random variables with *even* densities, is the expected number of
 linear regions independent of the densities?
 
 **Test.** Fix a vector of magnitudes |θ| (all non-zero) and average the exact
-region count over *all* 2^P sign patterns ε·|θ|.  If the expectation were
-density-independent, this average would be the same for almost every |θ|
-(a density concentrated near |θ| has expectation equal to this average).
-Conversely, two magnitude vectors with different sign-flip averages prove
-density dependence.  Everything is exact: each count is an exact LP-based
-enumeration and the average is an exact rational number.
+region count over *all* 2^P sign patterns ε·|θ|.  This is exactly the
+expectation under independent Rademacher sign flips of the fixed magnitudes.
+To pass from this discrete statement to continuous even densities, one also
+needs local stability: the sign-flip average must be constant on an open box
+around |θ|.  Given two locally stable magnitude vectors with different
+averages, put each parameter's independent even density inside the corresponding
+pair of small symmetric intervals.  The two continuous-distribution expectations
+then equal the two sign-flip averages.  (The marginal densities may differ by
+parameter; this does not establish the analogous claim for one common i.i.d.
+density.)  Everything is exact: each count is an exact LP-based enumeration and
+the average is an exact rational number.
 
 Library: `exact_regions.sign_flip_averages(net, fix_first_layer, ...)` returns the
 exact averages of the statistics of `exact_regions.region_summary` (activation regions,
@@ -130,6 +135,9 @@ Scripts:
 * `verify2d.py` – an independent, LP-free counter for 2-D inputs (exact polygon clipping,
   areas for full dimension, shared edges of positive length for adjacency), used to
   cross-check the LP-based counter network by network.
+* `verify_stability2d.py` – an exact local-stability certificate for the 2-D
+  `(2,3,1)` example.  This optional verification script requires SymPy and NumPy;
+  the region-counting library itself remains standard-library only.
 * `quadrangle_example.py` – construction of the example.
 
 ### Density-independent cases
@@ -144,7 +152,7 @@ true in general.
 **Construction** (`quadrangle_example.py`).  Start from the network on R³ with hidden
 widths (3, 1): `s = relu(u)`, `c = relu(-s₁ - s₂ + s₃ - 1)`, output `c + 1/3`.  Its
 non-constant locus is the cone `C = {w ≥ 1 + max(0, u, v, u+v)}` and it is constant
-(zero) elsewhere.  Restrict to a plane via an affine map `u = M t + m`, `t ∈ R²` (this
+(`1/3`) elsewhere.  Restrict to a plane via an affine map `u = M t + m`, `t ∈ R²` (this
 *is* a network on R² whose first layer is `(M, m)`): the non-constant locus becomes the
 quadrangle `Q = {t : M t + m ∈ C}`, bounded exactly when the plane's slope lies in the
 open unit square, and the constant locus `R² \ Q` is a ring.  Finally add a hidden layer
@@ -154,8 +162,10 @@ picture is projected onto the axes.  Two configurations are provided:
 * `examples/quad_ring.json` – `Q` inside the open first quadrant (constant locus is a ring);
 * `examples/quad_axis.json` – the `t₁`-axis crosses `Q` (the constant locus is cut open).
 
-All parameters are generic (non-zero except the fixed first layer; counts stable under
-random relative perturbations of 1e‑4 … 1e‑7).  For comparison,
+All five supplied magnitude vectors have an exact local-stability certificate
+(`verify_stability2d.py`): every activation region and facet-connected linear
+region is unchanged throughout some open neighborhood, simultaneously for all
+sign patterns.  For comparison,
 `examples/quad_random{0,1,2}.json` hold random magnitudes in (0, 1] for the same
 architecture (first layer fixed to the identity).
 
@@ -171,8 +181,8 @@ architecture (first layer fixed to the identity).
 | quad_random2 | 387/32 | 319/64 | 97/64 = 3104/2048 | **13/2** |
 
 So the expected number of **activation regions** (387/32) and of **non-constant linear
-regions** (319/64) coincide for all magnitudes, but the expected number of **constant
-linear regions** – hence of linear regions – differs between magnitude vectors.  The
+regions** (319/64) coincide for all five displayed magnitude vectors, but the expected
+number of **constant linear regions** – hence of linear regions – differs between magnitude vectors.  The
 expected number of linear regions therefore depends on the parameter densities for this
 architecture.  The mechanism is the gluing of constant activation regions: their number
 (455/64 on average) is the same for all magnitudes, but how many connected components
@@ -183,7 +193,20 @@ not linked by a chain of (n−1)-dimensional contacts count as distinct linear r
 5 × 16 384 networks with `verify2d.py` (exact polygon clipping, no LP) and reports the
 number of disagreements – it was 0 for all of them.  The same 2^14 enumeration was also
 run with the default (non-generic) facet test, so no genericity assumption enters the
-counts.
+counts.  In addition, `verify_stability2d.py` proves that none of the displayed
+averages is an isolated, measure-zero parameter phenomenon.  It symbolically
+classifies all structural incidences among the activation-boundary lines, then
+checks exactly that every non-structural determinant is nonzero for every sign
+configuration and that no distinct output affine maps coincide accidentally.
+
+To reproduce the stability certificate (about 30 seconds for all five files in
+the tested environment):
+
+```bash
+python verify_stability2d.py examples/quad_*.json
+```
+
+The complete recorded certificate summary is in `results/stability_certificate.md`.
 
 **To replicate** (about 5 min per magnitude file with 6 processes, double with `--verify`):
 

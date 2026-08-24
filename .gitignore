@@ -35,8 +35,9 @@ env/
 *.fls
 *.toc
 
-# Experiment outputs (regenerable by the scripts); only results/density_dependence.md,
-# the table produced by density_dependence.py, is tracked.
+# Experiment outputs (regenerable by the scripts); the exact experiment table and
+# local-stability certificate summary are tracked.
 results/*
 !results/density_dependence.md
+!results/stability_certificate.md
 nohup.out
