@@ -54,9 +54,10 @@ class TestSignFlipVsTheory(unittest.TestCase):
                                        msg="E_act mismatch for ln=%s seed=%d" % (ln, seed))
 
     def test_linear_average_matches_E_lin_one_hidden_layer(self):
-        # with one hidden layer E_lin = E_act and the sign-flip average agrees
+        # with one hidden layer E_lin_fake is the true expectation (= E_act) and
+        # the sign-flip average agrees
         for ln in ([1, 2], [1, 3], [2, 2]):
-            expected = theory.E_lin(list(ln))
+            expected = theory.E_lin_fake(list(ln))
             self.assertAlmostEqual(theory.E_act(list(ln)), expected, places=12)
             avg, _, _ = sign_flip_averages(magnitudes(ln, 0))
             self.assertAlmostEqual(float(avg["linear"]), expected, places=9,
@@ -67,7 +68,7 @@ class TestSignFlipVsTheory(unittest.TestCase):
         # expected number of linear regions is fixed and equal to E_lin
         for ln, fix in ([[1, 1, 2], False], [[1, 2, 1], False], [[1, 2, 2], False],
                         [[2, 1, 2], False], [[2, 2, 1], False], [[2, 2, 2], True], [[3, 2, 2], True]):
-            expected = theory.E_lin(list(ln))
+            expected = theory.E_lin_fake(list(ln))
             avg, _, _ = sign_flip_averages(magnitudes(ln, 0), fix_first_layer=fix)
             self.assertAlmostEqual(float(avg["linear"]), expected, places=9,
                                    msg="E_lin mismatch for ln=%s" % (ln,))
@@ -76,7 +77,7 @@ class TestSignFlipVsTheory(unittest.TestCase):
     def test_linear_average_matches_E_lin_2_2_3(self):
         avg, _, _ = sign_flip_averages(magnitudes([2, 2, 3], 0), fix_first_layer=True)
         self.assertAlmostEqual(float(avg["activation"]), theory.E_act([2, 2, 3]), places=9)
-        self.assertAlmostEqual(float(avg["linear"]), theory.E_lin([2, 2, 3]), places=9)
+        self.assertAlmostEqual(float(avg["linear"]), theory.E_lin_fake([2, 2, 3]), places=9)
 
 
 if __name__ == "__main__":

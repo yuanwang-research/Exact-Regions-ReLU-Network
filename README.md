@@ -135,9 +135,12 @@ Scripts:
 * `verify2d.py` – an independent, LP-free counter for 2-D inputs (exact polygon clipping,
   areas for full dimension, shared edges of positive length for adjacency), used to
   cross-check the LP-based counter network by network.
-* `verify_stability2d.py` – an exact local-stability certificate for the 2-D
-  `(2,3,1)` example.  This optional verification script requires SymPy and NumPy;
-  the region-counting library itself remains standard-library only.
+* `verify_stability.py` – exact local-stability certificates for any (small)
+  architecture: all sign flips of a magnitude vector at once (`certify`), or a
+  single signed network (`--single` / `certify_single`), which verifies that a
+  particular network is generic, i.e. that its region counts are unchanged in a
+  neighborhood of its parameters.  This optional script requires SymPy and
+  NumPy; the region-counting library itself remains standard-library only.
 * `quadrangle_example.py` – construction of the example.
 
 ### Density-independent cases
@@ -163,7 +166,7 @@ picture is projected onto the axes.  Two configurations are provided:
 * `examples/quad_axis.json` – the `t₁`-axis crosses `Q` (the constant locus is cut open).
 
 All five supplied magnitude vectors have an exact local-stability certificate
-(`verify_stability2d.py`): every activation region and facet-connected linear
+(`verify_stability.py`): every activation region and facet-connected linear
 region is unchanged throughout some open neighborhood, simultaneously for all
 sign patterns.  For comparison,
 `examples/quad_random{0,1,2}.json` hold random magnitudes in (0, 1] for the same
@@ -193,17 +196,17 @@ not linked by a chain of (n−1)-dimensional contacts count as distinct linear r
 5 × 16 384 networks with `verify2d.py` (exact polygon clipping, no LP) and reports the
 number of disagreements – it was 0 for all of them.  The same 2^14 enumeration was also
 run with the default (non-generic) facet test, so no genericity assumption enters the
-counts.  In addition, `verify_stability2d.py` proves that none of the displayed
+counts.  In addition, `verify_stability.py` proves that none of the displayed
 averages is an isolated, measure-zero parameter phenomenon.  It symbolically
 classifies all structural incidences among the activation-boundary lines, then
 checks exactly that every non-structural determinant is nonzero for every sign
 configuration and that no distinct output affine maps coincide accidentally.
 
-To reproduce the stability certificate (about 30 seconds for all five files in
+To reproduce the stability certificate (about 80 seconds for all five files in
 the tested environment):
 
 ```bash
-python verify_stability2d.py examples/quad_*.json
+python verify_stability.py examples/quad_*.json
 ```
 
 The complete recorded certificate summary is in `results/stability_certificate.md`.
